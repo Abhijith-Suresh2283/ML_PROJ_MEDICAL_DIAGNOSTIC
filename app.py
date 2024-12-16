@@ -105,6 +105,7 @@ def pneumoniapredictPage():
                 img = img.reshape((1, 36, 36, 1))  # Adding batch dimension
 
                 # Ensure model is loaded once
+                model = load_model("models/pneumonia.h5")
                 pred = np.argmax(model.predict(img)[0])
             else:
                 return render_template('pneumonia.html', message="Please upload an Image")
