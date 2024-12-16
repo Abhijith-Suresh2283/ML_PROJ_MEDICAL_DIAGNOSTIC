@@ -87,22 +87,32 @@ def predictPage():
     return render_template('predict.html', pred = pred)
 
 
-@app.route("/pneumoniapredict", methods = ['POST', 'GET'])
+@app.route("/pneumoniapredict", methods=['POST', 'GET'])
 def pneumoniapredictPage():
+    pred = None  # Initialize pred to avoid UnboundLocalError
+
     if request.method == 'POST':
         try:
             if 'image' in request.files:
                 img = Image.open(request.files['image']).convert('L')
-                img = img.resize((36,36))
+                img = img.resize((36, 36))
                 img = np.asarray(img)
-                img = img.reshape((1,36,36,1))
+                img = img.reshape((1, 36, 36, 1))
                 img = img / 255.0
+
+                # Load the model (recommended to load outside request to save time)
                 model = load_model("models/pneumonia.h5")
                 pred = np.argmax(model.predict(img)[0])
-        except:
-            message = "Please upload an Image"
-            return render_template('pneumonia.html', message = message)
-    return render_template('pneumonia_predict.html', pred = pred)
+            else:
+                message = "No image uploaded."
+                return render_template('pneumonia.html', message=message)
+        except Exception as e:
+            print(f"Prediction error: {e}")
+            message = "An error occurred during prediction."
+            return render_template('pneumonia.html', message=message)
+
+    return render_template('pneumonia_predict.html', pred=pred)
+
 
 if __name__ == '__main__':
 	app.run(debug = False)
